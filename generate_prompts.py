@@ -24,7 +24,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--model_name_or_path",
-    default="bert-base-uncased",
+    default="bert-base-german-cased",
     type=str,
     help="Path to pretrained model or model identifier from huggingface.co/models",
 )
@@ -38,7 +38,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--vocab_file",
-    default='data/wiki_words_5000.txt',
+    default='data/wiki_words_5000_de.txt',
     type=str,
     help="Path to the file that stores the vocabulary of the prompts",
 )
@@ -68,8 +68,8 @@ parser.add_argument(
 
 def send_to_cuda(tar1_tokenized,tar2_tokenized):
     for key in tar1_tokenized.keys():
-        tar1_tokenized[key] = tar1_tokenized[key].cuda()
-        tar2_tokenized[key] = tar2_tokenized[key].cuda()
+        tar1_tokenized[key] = tar1_tokenized[key].cpu()
+        tar2_tokenized[key] = tar2_tokenized[key].cpu()
     return tar1_tokenized,tar2_tokenized
 
 
@@ -158,19 +158,19 @@ if __name__ == "__main__":
         raise NotImplementedError("not implemented!")
     model = torch.nn.DataParallel(model)
     model.eval()
-    model.cuda()
+    model.cpu()
     
     jsd_model = JSD(reduction='none')
 
     if args.debias_type == 'gender':
-        male_words=['fathers','actor','prince','men','gentlemen','sir','brother','his','king','husband','dad','males','sir','him','boyfriend','he','hero',                'kings','brothers','son','sons','himself','gentleman','his','father','male','man','grandpa','boy','grandfather']
-        female_words=[ 'mothers','actress','princess','women','ladies','madam','sister','her','queen','wife','mom','females','miss','her','girlfriend',                  'she','heroine','queens','sisters','daughter','daughters','herself','lady','hers','mother','female','woman','grandma','girl','grandmother']
+        male_words=['Väter','Schauspieler','Prinz','Männer','Herren','Sir','Bruder','seins','König','Ehemann','Papa','männliche','Sir','ihm','Freund','er','Held',                'Könige','Brüder','Sohn','Söhne','ihm','Herr','seins','Vater','männlich','Mann','Opa','Junge','Großvater']
+        female_words=[ 'Mütter','Schauspielerin','Prinzessin','Frauen','Damen','Madam','Schwester','ihrs','Königin','Ehefrau','Mama','weibliche','Miss','ihr','Freundin',                  'sie','Heldin','Königinnen','Schwestern','Tochter','Töchter','ihr','Dame','ihrs','Mutter','weiblich','Frau','Oma','Mädchen','Großmutter']
 
     elif args.debias_type=='race':
-        race1 = ["black","african","black","africa","africa","africa","black people","african people","black people","the africa"]
-        race2 = ["caucasian","caucasian","white","america","america","europe","caucasian people","caucasian people","white people","the america"]
+        race1 = ["schwarz","afrikanisch","schwarz","Afrika","Afrika","Afrika","schwarze Leute","afrikanische Leute","schwarze Leute","das Afrika"]
+        race2 = ["kaukasisch","kaukasisch","weiß","Amerika","Amerika","Europa","weiße Leute","kaukasische Leute","weiße Leute","das Amerika"]
 
-    ster_words_ = clean_word_list(load_word_list("data/stereotype.txt"),tokenizer)
+    ster_words_ = clean_word_list(load_word_list("data/stereotype-de.txt"),tokenizer)
     ster_words = tokenizer.convert_tokens_to_ids(ster_words_)   #stereotype words   
 
     vocab = load_wiki_word_list(args.vocab_file)           
